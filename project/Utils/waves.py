@@ -2,7 +2,7 @@ import numpy as np
 from typing import List
 
 class Waves:
-    def __init__(self, arrTime) -> None:
+    def __init__(self, arrTime: np.ndarray) -> None:
         self.arrTime: np.ndarray = arrTime
         pass
 

@@ -8,6 +8,7 @@ import os
 # from project.Utils.waves import Waves
 from Utils.plotter import PiezoPlotter
 from Utils.waves import Waves
+from Utils.circuit import Circuit
 
 
 if __name__ == "__main__":
@@ -29,7 +30,7 @@ if __name__ == "__main__":
     clsPlotter = PiezoPlotter(arrTime)
 
 
-    """ Main """
+    """ Main Waves """
     # First Waves
     arrCleanSteps: np.ndarray = clsWaves.sinWaveCreator(nAmplitude*1.1, nFrequency, nPhase)
     arrFirstDeform: np.ndarray = clsWaves.sinWaveCreator(nAmplitude*0.125, nFrequency*7, np.pi/2)
@@ -52,8 +53,20 @@ if __name__ == "__main__":
     clsPlotter.graphWaves([arrRealSteps, arrPiezo1, arrPiezo2])
 
     # Max Voltage
-    arrMaxV = np.maximum(np.abs(arrPiezo1), np.abs(arrPiezo2))
+    arrMaxV: np.ndarray = np.maximum(np.abs(arrPiezo1), np.abs(arrPiezo2))
 
     clsPlotter.graphWaves([arrMaxV, np.abs(arrPiezo1), np.abs(arrPiezo2)])
+    
+    """ Capacitor """
+    # Charge
+    nResistance: float = 500.00 * 10**3
+    nCapacitance: float = 1000.00 * 10**(-6)
+
+    clsCircuit = Circuit(arrTime, nResistance, nCapacitance)
+
+    arrChargeVolt: np.ndarray = clsCircuit.capacitorCharge(arrMaxV)
+    arrChargeVoltNR: np.ndarray = clsCircuit.capacitorChargeNoRegulated(arrMaxV)
+
+    clsPlotter.graphWaves([arrChargeVolt, arrChargeVoltNR])
     pass
 

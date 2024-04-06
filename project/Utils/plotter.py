@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from typing import List
 
 class PiezoPlotter:
-    def __init__(self, arrTime) -> None:
+    def __init__(self, arrTime: np.ndarray) -> None:
         self.arrTime: np.ndarray = arrTime
         pass
 
