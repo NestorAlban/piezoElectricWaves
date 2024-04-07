@@ -19,8 +19,8 @@ if __name__ == "__main__":
     nFrequency: float = 1.0
     nPhase: float = 0.0
     nInitTime: float = 0.0
-    nFinalTime: float = 10.0
-    nPointsNum: int = 1000
+    nFinalTime: float = 3500.0
+    nPointsNum: int = 10000
 
     # Init Time
     arrTime: np.ndarray = np.linspace(nInitTime, nFinalTime, nPointsNum)
@@ -37,36 +37,41 @@ if __name__ == "__main__":
 
     arrStepsFrtDeform: np.ndarray = arrCleanSteps + arrFirstDeform
 
-    clsPlotter.graphWaves([arrCleanSteps, arrFirstDeform, arrStepsFrtDeform])
+    # clsPlotter.graphWaves([arrCleanSteps, arrFirstDeform, arrStepsFrtDeform])
 
     # Real Steps
     arrSecondDeform: np.ndarray = clsWaves.sinWaveNoPhaseCreator(nAmplitude*0.02, nFrequency*7)
 
     arrRealSteps: np.ndarray = arrStepsFrtDeform + arrSecondDeform
 
-    clsPlotter.graphWaves([arrStepsFrtDeform, arrSecondDeform, arrRealSteps])
+    # clsPlotter.graphWaves([arrStepsFrtDeform, arrSecondDeform, arrRealSteps])
 
     # Piezo Waves
     arrPiezo1: np.ndarray = clsWaves.sinWaveNoPhaseCreator(nAmplitude*0.08, nFrequency*7.2) + arrRealSteps
     arrPiezo2: np.ndarray = clsWaves.sinWaveNoPhaseCreator(nAmplitude*0.05, nFrequency*7.9) + arrRealSteps
 
-    clsPlotter.graphWaves([arrRealSteps, arrPiezo1, arrPiezo2])
+    # clsPlotter.graphWaves([arrRealSteps, arrPiezo1, arrPiezo2])
 
     # Max Voltage
-    arrMaxV: np.ndarray = np.maximum(np.abs(arrPiezo1), np.abs(arrPiezo2))
-
-    clsPlotter.graphWaves([arrMaxV, np.abs(arrPiezo1), np.abs(arrPiezo2)])
+    arrMaxVPar: np.ndarray = np.maximum(np.abs(arrPiezo1), np.abs(arrPiezo2))
+    arrMaxVSer: np.ndarray = np.abs(arrPiezo1) + np.abs(arrPiezo2)
+    clsPlotter.graphWaves([arrMaxVSer, arrMaxVPar, np.abs(arrPiezo1), np.abs(arrPiezo2)])
     
     """ Capacitor """
+    # 3 piezo electricos por grupo
+    # 5 grupos por capacitor
     # Charge
-    nResistance: float = 500.00 * 10**3
+    nResistance: float = 500.00 * 10**3 *3/5
     nCapacitance: float = 1000.00 * 10**(-6)
-
+    print(nResistance*nCapacitance)
     clsCircuit = Circuit(arrTime, nResistance, nCapacitance)
 
-    arrChargeVolt: np.ndarray = clsCircuit.capacitorCharge(arrMaxV)
-    arrChargeVoltNR: np.ndarray = clsCircuit.capacitorChargeNoRegulated(arrMaxV)
+    arrChargeVoltPar: np.ndarray = clsCircuit.capacitorCharge(arrMaxVPar)
+    arrChargeVoltNRPar: np.ndarray = clsCircuit.capacitorChargeNoRegulated(arrMaxVPar)
 
-    clsPlotter.graphWaves([arrChargeVolt, arrChargeVoltNR])
+    arrChargeVoltSer: np.ndarray = clsCircuit.capacitorCharge(arrMaxVSer)
+    arrChargeVoltNRSer: np.ndarray = clsCircuit.capacitorChargeNoRegulated(arrMaxVSer)
+
+    clsPlotter.graphWaves([arrChargeVoltPar, arrChargeVoltNRPar, arrChargeVoltSer, arrChargeVoltNRSer])
     pass
 

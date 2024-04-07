@@ -8,3 +8,4 @@ __pycache__
 page/
 node_modules/
 package-lock.json
+tests/
