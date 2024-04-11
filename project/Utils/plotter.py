@@ -4,13 +4,21 @@ from typing import List
 
 class PiezoPlotter:
     def __init__(self, arrTime: np.ndarray) -> None:
-        self.arrTime: np.ndarray = arrTime
-        pass
+        try:
+            if not isinstance(arrTime, np.ndarray):
+                raise TypeError("El argumento 'arrTime' debe ser de tipo 'np.ndarray'")
+
+            self.arrTime: np.ndarray = arrTime
+        except Exception as err:
+            raise err
 
     def graphWaves(
         self,
         lstWaves: List[np.ndarray], 
-        lBlock: bool = True
+        lBlock: bool = True,
+        lGuardar: bool = False,
+        cRuta: str = "",
+        cNombre: str = ""
     ) -> None:
         nWavesNum: int = len(lstWaves)
         nRows: int = nWavesNum
@@ -26,7 +34,13 @@ class PiezoPlotter:
             plt.grid(True)
 
         plt.tight_layout()
-        plt.show(block = lBlock)
+        if lGuardar:
+            if cRuta != "" and cNombre != "" :
+                plt.savefig(cRuta+"/"+cNombre)
+                plt.close()
+            pass
+        else:
+            plt.show(block = lBlock)
 
     def graphWavesWithNames(
         self,
