@@ -2,6 +2,7 @@ import numpy as np
 import sys
 import os
 from typing import List, Tuple
+from datetime import datetime
 # print(sys.path)
 # parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 # sys.path.append(parent_dir)
@@ -16,12 +17,12 @@ if __name__ == "__main__":
     try:
         """ Parameters Definition """
         ## Variables
-        nAmplitude: float = 16.0
+        nAmplitude: float = 4.0
         nFrequency: float = 1.0
         nPhase: float = 0.0
         nInitTime: float = 0.0
-        nFinalTime: float = 3500.0
-        nPointsNum: int = 10000
+        nFinalTime: float = 20.0
+        nPointsNum: int = 1000
 
         ## Init Time
         arrTime: np.ndarray = np.linspace(nInitTime, nFinalTime, nPointsNum)
@@ -52,10 +53,20 @@ if __name__ == "__main__":
 
         ## Creación de grupos
         clsCircuit = Circuit(arrTime, nAmplitude, nFrequency)
-        cRutaGuardado: str = "../tests/20240411"
-        cNombreGuardado: str = "test1_"
+
+        dFechaActual = datetime.now()
+        cFechaActual = dFechaActual.strftime("%Y%m%d")
+        cRutaGuardado: str = "./tests/" + cFechaActual
+        if not os.path.exists(cRutaGuardado):
+            os.makedirs(cRutaGuardado)
+
+        cNombreGuardado: str = "test3_"
         nPiezoAmount: int = 3
         lstResistance: List[float] = [500.00 * 10**3]
+        lstSerialResistance: List[float] = []
+        lstFinalVoltagesSerialResistance: List[float] = []
+
+        ## Primer grupo
         lstAmplitudeMinMax: List[float] = [0.04, 0.1]
         lstFrequencyMinMax: List[float] = [7.2, 7.9]
 
@@ -66,9 +77,44 @@ if __name__ == "__main__":
         lstResistanceF: List[float] = tplSerialPiezoGroup[2]
         nFinalResistance: float = tplSerialPiezoGroup[3]
 
-        clsPlotter.graphWaves(lstPiezoWaves, lGuardar= True, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"lst")
+        lstSerialResistance.append(nFinalResistance)
+
+        clsPlotter.graphWaves(lstPiezoWaves, lGuardar= True, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"lst1")
         
-        clsPlotter.graphWaves([arrTotalVoltage], lGuardar= True, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"tot")
+        clsPlotter.graphWaves([arrTotalVoltage], lGuardar= True, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"tot1")
+
+        ## Segundo grupo
+        lstAmplitudeMinMax2: List[float] = [0.04, 0.1]
+        lstFrequencyMinMax2: List[float] = [7.2, 7.9]
+
+        tplSerialPiezoGroup2 = clsCircuit.createSerialPiezoElectricGroup(arrRealSteps, nPiezoAmount, lstResistance, lstAmplitudeMinMax2, lstFrequencyMinMax2)
+
+        lstPiezoWaves2: List[np.ndarray] = tplSerialPiezoGroup2[0]
+        arrTotalVoltage2: np.ndarray = tplSerialPiezoGroup2[1]
+        lstResistanceF: List[float] = tplSerialPiezoGroup2[2]
+        nFinalResistance2: float = tplSerialPiezoGroup2[3]
+
+        lstSerialResistance.append(nFinalResistance2)
+
+        clsPlotter.graphWaves(lstPiezoWaves2, lGuardar= True, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"lst2")
+        
+        clsPlotter.graphWaves([arrTotalVoltage2], lGuardar= True, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"tot2")
+
+        ## Hallar la resistencia total
+        nResistenciaFinal: float = 1 / sum(1 / nResistanceTemp for nResistanceTemp in lstSerialResistance)
+
+        ## Voltaje final
+        nCapacitance: float = 1000.00 * 10**(-6)
+
+        arrMaxVPar: np.ndarray = np.maximum(arrTotalVoltage, arrTotalVoltage2)
+
+        clsPlotter.graphWaves([arrMaxVPar], lGuardar= True, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"fin2")
+
+        arrChargeVolt: np.ndarray = clsCircuit.capacitorCharge(nResistenciaFinal, nCapacitance, arrMaxVPar)
+        arrChargeVoltNR: np.ndarray = clsCircuit.capacitorChargeNoRegulated(nResistenciaFinal, nCapacitance, arrMaxVPar)
+
+        clsPlotter.graphWaves([arrChargeVolt, arrChargeVoltNR], lGuardar= True, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"carga1")
+
         pass
     except Exception as errMain:
         raise errMain

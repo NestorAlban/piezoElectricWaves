@@ -65,6 +65,7 @@ class Circuit:
         # Igualar lstResistance a la cantidad de piezoelectricos
         while len(lstResistance) < nPiezoAmount:
             lstResistance += lstResistance
+        lstResistance = lstResistance[:nPiezoAmount]
 
         clsWavesInstance = Waves(self.arrTime)
         lstPiezoWaves: List[np.ndarray] = []
@@ -77,15 +78,15 @@ class Circuit:
             raise TypeError("Error con la variable nResistancesSum")
         nFinalResistance = nResistancesSum
 
-        for _ in range(nPiezoAmount):
+        for nPiezoIndex in range(nPiezoAmount):
             # Generar valores aleatorios para la amplitud y la frecuencia
             nAmplitudeVariaton: float = round(random.uniform(lstAmplitudeMinMax[0], lstAmplitudeMinMax[1]), 4)
             nFrequencyVariation: float = round(random.uniform(lstFrequencyMinMax[0], lstFrequencyMinMax[1]), 4)
             # Crear el piezoelectrico y agregarlo a la lista
-            arrPiezoWave = clsWavesInstance.sinWaveNoPhaseCreator(self.nAmplitude * nAmplitudeVariaton, self.nFrequency * nFrequencyVariation)
+            arrPiezoWave = clsWavesInstance.sinWaveNoPhaseCreator(self.nAmplitude * nAmplitudeVariaton, self.nFrequency * nFrequencyVariation) + arrStepsWave
             lstPiezoWaves.append(arrPiezoWave)
 
-        arrTotalVoltage = np.sum(lstPiezoWaves, axis=0)
+        arrTotalVoltage = np.sum(np.abs(lstPiezoWaves), axis=0)
 
         return (lstPiezoWaves, arrTotalVoltage, lstResistance, nFinalResistance)
 
