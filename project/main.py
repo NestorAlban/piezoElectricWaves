@@ -21,8 +21,9 @@ if __name__ == "__main__":
         nFrequency: float = 1.0
         nPhase: float = 0.0
         nInitTime: float = 0.0
-        nFinalTime: float = 20.0
-        nPointsNum: int = 1000
+        nFinalTime: float = 200.0
+        nPointsNum: int = 100000
+        lSaveVal: bool = True
 
         ## Init Time
         arrTime: np.ndarray = np.linspace(nInitTime, nFinalTime, nPointsNum)
@@ -60,7 +61,7 @@ if __name__ == "__main__":
         if not os.path.exists(cRutaGuardado):
             os.makedirs(cRutaGuardado)
 
-        cNombreGuardado: str = "test3_"
+        cNombreGuardado: str = "test4_"
         nPiezoAmount: int = 3
         lstResistance: List[float] = [500.00 * 10**3]
         lstSerialResistance: List[float] = []
@@ -79,9 +80,9 @@ if __name__ == "__main__":
 
         lstSerialResistance.append(nFinalResistance)
 
-        clsPlotter.graphWaves(lstPiezoWaves, lGuardar= True, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"lst1")
+        clsPlotter.graphWaves(lstPiezoWaves, lGuardar= lSaveVal, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"lst1")
         
-        clsPlotter.graphWaves([arrTotalVoltage], lGuardar= True, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"tot1")
+        clsPlotter.graphWaves([arrTotalVoltage], lGuardar= lSaveVal, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"tot1")
 
         ## Segundo grupo
         lstAmplitudeMinMax2: List[float] = [0.04, 0.1]
@@ -96,24 +97,25 @@ if __name__ == "__main__":
 
         lstSerialResistance.append(nFinalResistance2)
 
-        clsPlotter.graphWaves(lstPiezoWaves2, lGuardar= True, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"lst2")
+        clsPlotter.graphWaves(lstPiezoWaves2, lGuardar= lSaveVal, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"lst2")
         
-        clsPlotter.graphWaves([arrTotalVoltage2], lGuardar= True, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"tot2")
+        clsPlotter.graphWaves([arrTotalVoltage2], lGuardar= lSaveVal, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"tot2")
 
         ## Hallar la resistencia total
-        nResistenciaFinal: float = 1 / sum(1 / nResistanceTemp for nResistanceTemp in lstSerialResistance)
+        nResistenciaFinal: float = 1 / sum(1 / nResistanceTemp for nResistanceTemp in lstSerialResistance) # NPS*R/NGP
+        nResistenciaFinal = 500.00 * 10**3 *3/10
 
         ## Voltaje final
         nCapacitance: float = 1000.00 * 10**(-6)
 
-        arrMaxVPar: np.ndarray = np.maximum(arrTotalVoltage, arrTotalVoltage2)
+        arrVoltageParallel: np.ndarray = np.maximum(arrTotalVoltage, arrTotalVoltage2)
 
-        clsPlotter.graphWaves([arrMaxVPar], lGuardar= True, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"fin2")
+        clsPlotter.graphWaves([arrVoltageParallel], lGuardar= lSaveVal, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"fin2")
 
-        arrChargeVolt: np.ndarray = clsCircuit.capacitorCharge(nResistenciaFinal, nCapacitance, arrMaxVPar)
-        arrChargeVoltNR: np.ndarray = clsCircuit.capacitorChargeNoRegulated(nResistenciaFinal, nCapacitance, arrMaxVPar)
+        arrChargeVolt: np.ndarray = clsCircuit.capacitorCharge(nResistenciaFinal, nCapacitance, arrVoltageParallel)
+        arrChargeVoltNR: np.ndarray = clsCircuit.capacitorChargeNoRegulated(nResistenciaFinal, nCapacitance, arrVoltageParallel)
 
-        clsPlotter.graphWaves([arrChargeVolt, arrChargeVoltNR], lGuardar= True, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"carga1")
+        clsPlotter.graphWaves([arrChargeVolt, arrChargeVoltNR], lGuardar= lSaveVal, cRuta=cRutaGuardado, cNombre=cNombreGuardado+"carga1")
 
         pass
     except Exception as errMain:
